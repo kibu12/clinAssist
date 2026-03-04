@@ -107,6 +107,7 @@ class SessionHistoryItem(BaseModel):
     id: str
     created_at: str
     state: str
+    session_type: Optional[str] = None
     chief_complaint: Optional[str] = None
     risk_level: Optional[str] = None
 
@@ -150,7 +151,8 @@ class ErrorResponse(BaseModel):
 class ConsultRequest(BaseModel):
     """Request model for standalone Health Consult"""
     question: str = Field(..., min_length=1, max_length=1000)
-    session_id: Optional[str] = None # Optional context if they switch from intake
+    session_id: Optional[str] = None
+    context_session_id: Optional[str] = None
 
 
 class ConsultResponse(BaseModel):

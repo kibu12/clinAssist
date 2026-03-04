@@ -2,7 +2,7 @@
 ClinAssist - Speech-Driven Structured Clinical Intake System
 Main FastAPI application with all endpoints
 """
-from fastapi import FastAPI, UploadFile, File, HTTPException, Path as FastAPIPath, status, File as FastAPIFile, Form
+from fastapi import FastAPI, UploadFile, File, HTTPException, Path as FastAPIPath, status, File as FastAPIFile, Form, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse, RedirectResponse
@@ -73,7 +73,7 @@ async def health_check():
 async def create_new_session():
     """Create a new intake session"""
     try:
-        session_id = database.create_session()
+        session_id = database.create_session(session_type="intake")
         return {
             "session_id": session_id,
             "message": "Session created successfully"
@@ -314,17 +314,29 @@ async def process_standalone_consult(
         import llm
         import database
         
-        # If they provided a session_id, we can fetch context, otherwise it's pure generic
+        # Optional context from intake session
         symptom_data = None
         history = []
-        if request.session_id and database.session_exists(request.session_id):
-            session_id = request.session_id
-            memory = SessionMemory(session_id)
+        context_session_id = request.context_session_id
+        if not context_session_id and request.session_id and database.session_exists(request.session_id):
+            if database.get_session_type(request.session_id) == "intake":
+                context_session_id = request.session_id
+
+        if context_session_id and database.session_exists(context_session_id):
+            memory = SessionMemory(context_session_id)
             symptom_data = memory.get_symptom_data()
             history = memory.conversation_history
+
+        # Use only consult session ids for consult conversation history
+        if (
+            request.session_id
+            and database.session_exists(request.session_id)
+            and database.get_session_type(request.session_id) == "consult"
+        ):
+            session_id = request.session_id
         else:
             session_id = f"consult_{int(time.time())}"
-            database.create_session(session_id)
+            database.create_session(session_id, session_type="consult")
             
         # Log the user's question
         database.save_turn(session_id, "user", request.question)
@@ -364,7 +376,8 @@ async def process_standalone_consult(
 @app.post("/consult/voice", response_model=ConsultVoiceResponse)
 async def process_standalone_voice_consult(
     audio: UploadFile = FastAPIFile(...),
-    session_id: Optional[str] = Form(None)
+    session_id: Optional[str] = Form(None),
+    context_session_id: Optional[str] = Form(None)
 ):
     """
     Process standalone Health Consult using voice input
@@ -394,14 +407,21 @@ async def process_standalone_voice_consult(
         # 3. Context gathering
         symptom_data = None
         history = []
-        if session_id and database.session_exists(session_id):
-            actual_session_id = session_id
-            memory = SessionMemory(actual_session_id)
+        actual_context_session_id = context_session_id
+        if not actual_context_session_id and session_id and database.session_exists(session_id):
+            if database.get_session_type(session_id) == "intake":
+                actual_context_session_id = session_id
+
+        if actual_context_session_id and database.session_exists(actual_context_session_id):
+            memory = SessionMemory(actual_context_session_id)
             symptom_data = memory.get_symptom_data()
             history = memory.conversation_history
+
+        if session_id and database.session_exists(session_id) and database.get_session_type(session_id) == "consult":
+            actual_session_id = session_id
         else:
             actual_session_id = temp_session
-            database.create_session(actual_session_id)
+            database.create_session(actual_session_id, session_type="consult")
             
         # Log user question
         database.save_turn(actual_session_id, "user", transcript)
@@ -438,9 +458,17 @@ async def process_standalone_voice_consult(
 
 
 @app.get("/sessions", response_model=SessionHistoryResponse)
-async def list_sessions():
+async def list_sessions(
+    session_type: Optional[str] = Query(None, description="Filter by session type: intake or consult")
+):
     """List recent sessions"""
-    sessions = database.get_recent_sessions(limit=20)
+    if session_type and session_type not in {"intake", "consult"}:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"error": "Invalid session type", "detail": "session_type must be 'intake' or 'consult'"}
+        )
+
+    sessions = database.get_recent_sessions(limit=20, session_type=session_type)
     return {"sessions": sessions}
 
 

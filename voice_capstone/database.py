@@ -37,7 +37,8 @@ def init_database():
                 id TEXT PRIMARY KEY,
                 created_at TEXT NOT NULL,
                 state TEXT NOT NULL DEFAULT 'greeting',
-                asked_fields_json TEXT NOT NULL DEFAULT '[]'
+                asked_fields_json TEXT NOT NULL DEFAULT '[]',
+                session_type TEXT NOT NULL DEFAULT 'intake'
             )
         """)
 
@@ -46,6 +47,17 @@ def init_database():
         session_columns = [row[1] for row in cursor.fetchall()]
         if "asked_fields_json" not in session_columns:
             cursor.execute("ALTER TABLE sessions ADD COLUMN asked_fields_json TEXT NOT NULL DEFAULT '[]'")
+        if "session_type" not in session_columns:
+            cursor.execute("ALTER TABLE sessions ADD COLUMN session_type TEXT NOT NULL DEFAULT 'intake'")
+
+        # Backfill legacy consult sessions created before session_type existed
+        cursor.execute(
+            """
+            UPDATE sessions
+            SET session_type = 'consult'
+            WHERE id LIKE 'consult_%'
+            """
+        )
         
         # Symptom records table
         cursor.execute("""
@@ -103,7 +115,7 @@ def init_database():
         conn.commit()
 
 
-def create_session(session_id: str = None) -> str:
+def create_session(session_id: str = None, session_type: str = "intake") -> str:
     """Create a new session and return session ID"""
     if not session_id:
         session_id = str(uuid.uuid4())
@@ -112,8 +124,8 @@ def create_session(session_id: str = None) -> str:
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(
-            "INSERT INTO sessions (id, created_at, state, asked_fields_json) VALUES (?, ?, ?, ?)",
-            (session_id, timestamp, STATES["GREETING"], json.dumps([]))
+            "INSERT INTO sessions (id, created_at, state, asked_fields_json, session_type) VALUES (?, ?, ?, ?, ?)",
+            (session_id, timestamp, STATES["GREETING"], json.dumps([]), session_type)
         )
         
         # Initialize empty symptom record
@@ -142,6 +154,15 @@ def get_session_state(session_id: str) -> Optional[str]:
         cursor.execute("SELECT state FROM sessions WHERE id = ?", (session_id,))
         row = cursor.fetchone()
         return row["state"] if row else None
+
+
+def get_session_type(session_id: str) -> Optional[str]:
+    """Get session type (intake or consult)"""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT session_type FROM sessions WHERE id = ?", (session_id,))
+        row = cursor.fetchone()
+        return row["session_type"] if row else None
 
 
 def get_asked_fields(session_id: str) -> List[str]:
@@ -289,17 +310,23 @@ def get_session_export_data(session_id: str) -> Optional[Dict[str, Any]]:
         }
 
 
-def get_recent_sessions(limit: int = 10) -> List[Dict[str, Any]]:
+def get_recent_sessions(limit: int = 10, session_type: Optional[str] = None) -> List[Dict[str, Any]]:
     """Retrieve a list of recent sessions for history management"""
     with get_db_connection() as conn:
         cursor = conn.cursor()
         query = """
-            SELECT s.id, s.created_at, s.state, sr.chief_complaint, sr.risk_level
+            SELECT s.id, s.created_at, s.state, s.session_type, sr.chief_complaint, sr.risk_level
             FROM sessions s
             LEFT JOIN symptom_records sr ON s.id = sr.session_id
-            ORDER BY s.created_at DESC
-            LIMIT ?
         """
-        cursor.execute(query, (limit,))
+        params = []
+        if session_type:
+            query += " WHERE s.session_type = ?"
+            params.append(session_type)
+
+        query += " ORDER BY s.created_at DESC LIMIT ?"
+        params.append(limit)
+
+        cursor.execute(query, tuple(params))
         rows = cursor.fetchall()
         return [dict(row) for row in rows]

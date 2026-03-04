@@ -6,6 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ClinAssist - Voice Clinical Intake</title>
     <style>
+        :root {
+            --bg-top: #f4f8ff;
+            --bg-bottom: #edf3ff;
+            --surface: rgba(255, 255, 255, 0.96);
+            --surface-soft: #f8fbff;
+            --border: #dbe7ff;
+            --border-strong: #c7dbff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --brand: #2563eb;
+            --brand-dark: #1d4ed8;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --shadow-sm: 0 2px 10px rgba(15, 23, 42, 0.06);
+            --shadow-md: 0 16px 36px rgba(15, 23, 42, 0.08);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -17,26 +35,79 @@
             background:
                 radial-gradient(circle at 10% 10%, rgba(59, 130, 246, 0.14), transparent 40%),
                 radial-gradient(circle at 90% 0%, rgba(14, 165, 233, 0.1), transparent 35%),
-                linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
-            color: #0f172a;
+                linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            padding: 2.25rem 1rem 5.5rem;
+            align-items: stretch;
+            padding: 1rem 1rem 5.5rem;
         }
 
         .container {
             width: 100%;
-            max-width: 920px;
-            background: rgba(255, 255, 255, 0.96);
-            border: 1px solid #dbeafe;
-            border-radius: 24px;
-            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.07), 0 2px 10px rgba(14, 165, 233, 0.06);
+            max-width: none;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: var(--shadow-md);
             backdrop-filter: blur(3px);
             padding: 2.25rem;
+            min-height: calc(100vh - 5.5rem);
             animation: fadeIn 0.5s ease-in;
             transition: box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+
+        .brand-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            margin-bottom: 1rem;
+            padding: 0.85rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, #ffffff 0%, #f5f9ff 100%);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .brand-logo {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand) 100%);
+            color: #fff;
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
+        }
+
+        .brand-logo svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .brand-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.12rem;
+        }
+
+        .brand-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #163f8f;
+            letter-spacing: 0.01em;
+        }
+
+        .brand-subtitle {
+            font-size: 0.76rem;
+            color: var(--text-muted);
         }
 
         @keyframes fadeIn {
@@ -54,54 +125,81 @@
         header {
             margin-bottom: 1.5rem;
             padding: 2.1rem;
-            border-radius: 0 0 18px 18px;
-            background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
-            border: 1px solid #dbeafe;
-            border-top: 1px solid #e2e8f0;
+            border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, #ffffff 0%, #f4f8ff 100%);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
         }
 
         /* Top Level Tabs */
         .main-tabs {
             display: flex;
-            background: #f8fafc;
-            border: 1px solid #dbeafe;
+            background: #f1f5ff;
+            border: 1px solid var(--border);
             border-bottom: none;
-            border-radius: 18px 18px 0 0;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
             margin-bottom: 0;
             overflow: hidden;
         }
 
         .main-tab {
             flex: 1;
-            padding: 1rem;
+            padding: 0.95rem;
             text-align: center;
             font-weight: 600;
-            color: #64748b;
+            color: var(--text-muted);
             cursor: pointer;
             background: transparent;
             border: none;
             border-bottom: 3px solid transparent;
             transition: all 0.2s ease;
-            font-size: 1.05rem;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        .tab-icon {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: 0.85;
         }
 
         .main-tab.active {
-            color: #2563eb;
-            background: #eff6ff;
-            border-bottom-color: #2563eb;
+            color: var(--brand);
+            background: #eaf2ff;
+            border-bottom-color: var(--brand);
         }
 
         .main-tab:hover:not(.active) {
-            background: #f1f5f9;
+            background: #eef2ff;
         }
 
         .view-content {
-            display: none;
+            display: block;
             width: 100%;
+            opacity: 0;
+            transform: translateY(10px);
+            visibility: hidden;
+            pointer-events: none;
+            height: 0;
+            overflow: hidden;
+            transition: opacity 320ms ease, transform 320ms ease;
         }
 
         .view-content.active {
-            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+            pointer-events: auto;
+            height: auto;
+            overflow: visible;
         }
 
         .header-top {
@@ -110,6 +208,109 @@
             align-items: center;
             gap: 0.8rem;
             margin-bottom: 0.55rem;
+        }
+
+        .header-actions {
+            position: static;
+            display: flex;
+            flex-direction: row;
+            gap: 0.5rem;
+            align-items: center;
+            background: transparent;
+            border: none;
+            padding: 0;
+        }
+
+        .header-actions .btn-pill,
+        .header-actions .status-chip {
+            width: auto;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .header-actions .btn-pill {
+            min-height: auto;
+            padding: 0.55rem 0.95rem;
+            border-radius: 10px;
+            font-size: 0.84rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.36rem;
+        }
+
+        .btn-icon {
+            width: 14px;
+            height: 14px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .header-actions .btn-pill:hover {
+            background: #edf3ff;
+            color: var(--brand);
+        }
+
+        .header-actions .status-chip {
+            margin-top: 0;
+            white-space: nowrap;
+            font-size: 0.76rem;
+        }
+
+        .header-actions .status-chip .status-dot {
+            flex-shrink: 0;
+        }
+
+        .sidebar-history-title {
+            display: none;
+        }
+
+        .sidebar-history-list {
+            display: none;
+        }
+
+        .sidebar-history-item {
+            padding: 0.7rem;
+            border-radius: 10px;
+            border: 1px solid #1f2937;
+            background: #111827;
+            margin-bottom: 0.55rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sidebar-history-item:hover {
+            border-color: #334155;
+            background: #0f172a;
+        }
+
+        .sidebar-history-item.active {
+            border-color: #2563eb;
+            background: #172554;
+            box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.25);
+        }
+
+        .sidebar-history-date {
+            font-size: 0.72rem;
+            color: #94a3b8;
+            margin-bottom: 0.2rem;
+        }
+
+        .sidebar-history-complaint {
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-history-meta {
+            font-size: 0.68rem;
+            color: #64748b;
+            margin-top: 0.2rem;
         }
 
         .status-chip {
@@ -191,9 +392,9 @@
         }
 
         h1 {
-            font-size: 2.2rem;
+            font-size: 2.05rem;
             font-weight: 700;
-            color: #0b3b8f;
+            color: #163f8f;
             letter-spacing: -0.03em;
             margin-bottom: 0.5rem;
             line-height: 1.1;
@@ -201,7 +402,7 @@
 
         .hero-subtitle {
             font-size: 0.98rem;
-            color: #1d4ed8;
+            color: #2558c8;
             font-weight: 500;
             margin-bottom: 0.8rem;
         }
@@ -251,9 +452,10 @@
             display: none;
             animation: fadeIn 0.5s ease-in;
             background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 18px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
             padding: 1.25rem;
+            box-shadow: var(--shadow-sm);
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
@@ -275,7 +477,7 @@
             margin-bottom: 1.35rem;
             padding: 1.1rem;
             background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e5ecf8;
             border-radius: 14px;
         }
 
@@ -303,7 +505,7 @@
 
         .message-bubble {
             max-width: 78%;
-            padding: 0.8rem 1rem;
+            padding: 0.82rem 1rem;
             border-radius: 12px;
             line-height: 1.55;
             font-size: 0.9rem;
@@ -387,8 +589,8 @@
 
         .text-input {
             flex: 1;
-            padding: 0.78rem 1rem;
-            border: 1px solid #cbd5e1;
+            padding: 0.82rem 1rem;
+            border: 1px solid #c7d6ec;
             border-radius: 10px;
             font-size: 0.9rem;
             font-family: inherit;
@@ -403,19 +605,21 @@
         }
 
         .btn-send {
-            padding: 0.78rem 1.2rem;
-            background: #0b57d0;
+            padding: 0.82rem 1.2rem;
+            background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand) 100%);
             color: white;
             border: none;
             border-radius: 10px;
             font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
+            transition: all 0.2s ease;
         }
 
         .btn-send:hover {
-            background: #144ab6;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 22px rgba(37, 99, 235, 0.28);
         }
 
         .risk-badge {
@@ -465,8 +669,8 @@
         .btn-export {
             padding: 0.72rem 1.25rem;
             background: transparent;
-            color: #0b57d0;
-            border: 2px solid #0b57d0;
+            color: var(--brand-dark);
+            border: 2px solid var(--brand);
             border-radius: 10px;
             font-size: 0.9rem;
             font-weight: 600;
@@ -475,7 +679,7 @@
         }
 
         .btn-export:hover {
-            background: #0b57d0;
+            background: var(--brand);
             color: white;
         }
 
@@ -569,6 +773,28 @@
                 border-radius: 18px;
             }
 
+            body {
+                padding: 0 0 5.5rem;
+            }
+
+            .header-top {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.65rem;
+            }
+
+            .brand-bar {
+                padding: 0.75rem 0.85rem;
+                margin-bottom: 0.8rem;
+            }
+
+            .header-actions {
+                width: auto;
+                padding: 0;
+                gap: 0.4rem;
+                flex-wrap: wrap;
+            }
+
             header {
                 padding: 1.25rem;
             }
@@ -587,6 +813,11 @@
 
             .btn-primary {
                 width: 100%;
+            }
+
+            .history-sidebar {
+                width: min(92vw, 320px);
+                left: calc(-1 * min(92vw, 320px));
             }
         }
 
@@ -634,15 +865,15 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
-            border: 1px solid #cbd5e1;
+            border: 1px solid #c6d5ea;
             background: #ffffff;
-            color: #475569;
+            color: #3f4f67;
         }
 
         .btn-pill:hover {
-            border-color: #3b82f6;
-            color: #3b82f6;
-            background: #eff6ff;
+            border-color: var(--brand);
+            color: var(--brand);
+            background: #edf3ff;
         }
 
         .btn-pill.primary {
@@ -680,7 +911,8 @@
             background: white;
             width: 100%;
             max-width: 600px;
-            border-radius: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             max-height: 80vh;
             display: flex;
@@ -748,8 +980,9 @@
             left: -320px;
             width: 320px;
             height: 100%;
-            background: white;
-            box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1);
+            background: #ffffff;
+            box-shadow: 14px 0 36px rgba(15, 23, 42, 0.14);
+            border-right: 1px solid var(--border);
             z-index: 1100;
             transition: left 0.3s ease;
             display: flex;
@@ -762,11 +995,11 @@
 
         .history-header {
             padding: 1.5rem;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #f8fafc;
+            background: var(--surface-soft);
         }
 
         .history-list {
@@ -1026,18 +1259,47 @@
 
 <body>
     <div class="container">
+        <div class="brand-bar">
+            <div class="brand-logo" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 21s7-4.2 7-10V6l-7-3-7 3v5c0 5.8 7 10 7 10z"></path>
+                    <path d="M9.5 12.5l1.8 1.8 3.2-3.2"></path>
+                </svg>
+            </div>
+            <div class="brand-meta">
+                <div class="brand-title">ClinAssist Platform</div>
+                <div class="brand-subtitle">Clinical Intake + Health Consult Workspace</div>
+            </div>
+        </div>
+
         <div class="main-tabs">
-            <button class="main-tab active" id="tab-intake" onclick="switchMainTab('intake')">ClinAssist (Symptom
-                Check)</button>
-            <button class="main-tab" id="tab-consult" onclick="switchMainTab('consult')">Health Consult (Q&A)</button>
+            <button class="main-tab active" id="tab-intake" onclick="switchMainTab('intake')">
+                <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 12h16"></path>
+                    <path d="M12 4v16"></path>
+                </svg>
+                <span>ClinAssist (Symptom Check)</span>
+            </button>
+            <button class="main-tab" id="tab-consult" onclick="switchMainTab('consult')">
+                <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>Health Consult (Q&A)</span>
+            </button>
         </div>
 
         <header>
             <div class="header-top">
                 <h1 id="appTitle">ClinAssist</h1>
-                <div id="headerActions" style="display: flex; gap: 0.5rem; align-items: center;">
-                    <button class="btn-pill" onclick="startSession()" title="Start New Session">New</button>
-                    <button class="btn-pill" onclick="toggleHistory()" title="View History">History</button>
+                <div id="headerActions" class="header-actions">
+                    <button class="btn-pill" onclick="startSession()" title="Start New Session">
+                        <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                        <span>New</span>
+                    </button>
+                    <button class="btn-pill" onclick="toggleHistory()" title="View History">
+                        <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9"></path><path d="M3 3v6h6"></path></svg>
+                        <span>History</span>
+                    </button>
                     <div class="status-chip status-ready" id="statusChip" aria-live="polite">
                         <span class="status-dot"></span>
                         <span id="statusText">Ready</span>
@@ -1167,7 +1429,7 @@
     <div class="history-overlay" id="historyOverlay" onclick="toggleHistory()"></div>
     <div class="history-sidebar" id="historySidebar">
         <div class="history-header">
-            <h3 style="margin: 0; font-size: 1.1rem;">Session History</h3>
+            <h3 id="historyTitle" style="margin: 0; font-size: 1.1rem;">Session History</h3>
             <button class="close-modal" onclick="toggleHistory()">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M18 6L6 18M6 6l12 12"></path>
@@ -1175,18 +1437,32 @@
             </button>
         </div>
         <div class="history-list" id="historyList">
-            <!-- Loaded via JS -->
             <div style="text-align: center; color: #64748b; padding: 2rem;">Loading history...</div>
         </div>
     </div>
 
     <script>
         let sessionId = null;
+        let consultSessionId = null;
         let mediaRecorder = null;
         let audioChunks = [];
         let isRecording = false;
         let audioContext = null;
         let autoplayBlockedNoticeShown = false;
+
+        function getActiveTabType() {
+            return document.getElementById('tab-consult').classList.contains('active') ? 'consult' : 'intake';
+        }
+
+        function updateSessionDisplay() {
+            const sessionDisplay = document.getElementById('sessionIdDisplay');
+            if (!sessionDisplay) return;
+
+            const isConsult = getActiveTabType() === 'consult';
+            const activeSessionId = isConsult ? consultSessionId : sessionId;
+            const label = isConsult ? 'Health Consult' : 'ClinAssist';
+            sessionDisplay.textContent = activeSessionId ? `Active ${label} Session: ${activeSessionId}` : `No active ${label} session`;
+        }
 
         function toggleHistory() {
             const sidebar = document.getElementById('historySidebar');
@@ -1203,15 +1479,22 @@
 
         async function loadHistory() {
             const list = document.getElementById('historyList');
+            if (!list) return;
+            const sessionType = getActiveTabType();
+            const activeSessionId = sessionType === 'consult' ? consultSessionId : sessionId;
+            const historyTitle = document.getElementById('historyTitle');
+            if (historyTitle) {
+                historyTitle.textContent = sessionType === 'consult' ? 'Health Consult History' : 'ClinAssist History';
+            }
             try {
-                const response = await fetch('/sessions');
+                const response = await fetch(`/sessions?session_type=${sessionType}`);
                 const data = await response.json();
 
                 if (data.sessions && data.sessions.length > 0) {
                     list.innerHTML = data.sessions.map(s => `
-                        <div class="history-item ${s.id === sessionId ? 'active' : ''}" onclick="switchToSession('${s.id}')">
+                        <div class="history-item ${s.id === activeSessionId ? 'active' : ''}" onclick="switchToSession('${s.id}')">
                             <div class="history-date">${new Date(s.created_at).toLocaleString()}</div>
-                            <div class="history-complaint">${s.chief_complaint || 'Ongoing Session...'}</div>
+                            <div class="history-complaint">${sessionType === 'consult' ? (s.chief_complaint || 'Health Consult conversation') : (s.chief_complaint || 'Ongoing intake session...')}</div>
                             <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 0.25rem;">ID: ${s.id.substring(0, 8)}... [${s.state}]</div>
                         </div>
                     `).join('');
@@ -1225,38 +1508,63 @@
         }
 
         async function switchToSession(id) {
-            if (id === sessionId) {
-                toggleHistory();
+            const isConsult = getActiveTabType() === 'consult';
+            const currentSessionId = isConsult ? consultSessionId : sessionId;
+
+            if (id === currentSessionId) {
                 return;
             }
 
             try {
-                showLoading(true);
+                if (!isConsult) {
+                    showLoading(true);
+                }
                 const response = await fetch(`/session/${id}`);
                 const data = await response.json();
 
                 if (response.ok) {
-                    sessionId = id;
-                    resetUI();
-
-                    // Reconstruct conversation
-                    data.conversation_history.forEach(turn => {
-                        addMessage(turn.role, turn.content);
-                    });
-
-                    // Show completion elements if applicable
-                    if (data.state === 'complete') {
-                        if (data.risk_assessment) {
-                            showRiskBadge(data.risk_assessment);
+                    if (isConsult) {
+                        consultSessionId = id;
+                        const consultMessages = document.getElementById('consultMessages');
+                        if (consultMessages) {
+                            consultMessages.innerHTML = '';
+                            data.conversation_history.forEach(turn => {
+                                const msg = document.createElement('div');
+                                msg.className = `assistant-msg ${turn.role === 'user' ? 'user' : 'bot'}`;
+                                msg.textContent = turn.content;
+                                consultMessages.appendChild(msg);
+                            });
+                            consultMessages.scrollTop = consultMessages.scrollHeight;
                         }
-                        if (data.wellness_tip) {
-                            addWellnessTip(data.wellness_tip);
+                    } else {
+                        sessionId = id;
+                        resetUI();
+
+                        // Reconstruct conversation
+                        data.conversation_history.forEach(turn => {
+                            addMessage(turn.role, turn.content);
+                        });
+
+                        // Show completion elements if applicable
+                        if (data.state === 'complete') {
+                            if (data.risk_assessment) {
+                                showRiskBadge(data.risk_assessment);
+                            }
+                            if (data.wellness_tip) {
+                                addWellnessTip(data.wellness_tip);
+                            }
+                            addInteractiveSummaryPrompt();
+                            document.getElementById('exportSection').classList.add('active');
                         }
-                        addInteractiveSummaryPrompt();
-                        document.getElementById('exportSection').classList.add('active');
                     }
 
-                    toggleHistory();
+                    updateSessionDisplay();
+                    const sidebar = document.getElementById('historySidebar');
+                    const overlay = document.getElementById('historyOverlay');
+                    if (sidebar && overlay) {
+                        sidebar.classList.remove('active');
+                        overlay.classList.remove('active');
+                    }
                 } else {
                     alert('Failed to load session: ' + data.detail?.error);
                 }
@@ -1264,7 +1572,9 @@
                 console.error('Failed to switch session:', error);
                 alert('Connection error while switching session.');
             } finally {
-                showLoading(false);
+                if (!isConsult) {
+                    showLoading(false);
+                }
             }
         }
 
@@ -1282,17 +1592,17 @@
             if (exportSect) exportSect.classList.remove('active');
 
             // Update session ID display
-            const sessionDisplay = document.getElementById('sessionIdDisplay');
-            if (sessionDisplay) {
-                sessionDisplay.textContent = sessionId ? `Active Session: ${sessionId}` : 'No active session';
-            }
+            updateSessionDisplay();
+            loadHistory();
         }
 
         async function startSession() {
             // Check if we're in the Health Consult tab
             if (document.getElementById('tab-consult').classList.contains('active')) {
+                consultSessionId = null;
                 // Reset Health Consult View
                 document.getElementById('consultMessages').innerHTML = '<div class="assistant-msg bot">Hello! I\'m your Health Consult Assistant. How can I help you today?</div>';
+                updateSessionDisplay();
 
                 // Re-trigger the vocal greeting
                 speakFallback("Hello! I'm your Health Consult Assistant. How can I help you today?");
@@ -1527,8 +1837,11 @@
 
                 const formData = new FormData();
                 formData.append('audio', file);
+                if (consultSessionId) {
+                    formData.append('session_id', consultSessionId);
+                }
                 if (sessionId) {
-                    formData.append('session_id', sessionId);
+                    formData.append('context_session_id', sessionId);
                 }
 
                 const response = await fetch(`/consult/voice`, {
@@ -1544,7 +1857,8 @@
 
                 // Save session ID for conversation memory
                 if (data.session_id) {
-                    sessionId = data.session_id;
+                    consultSessionId = data.session_id;
+                    updateSessionDisplay();
                 }
 
                 const messagesDiv = document.getElementById('consultMessages');
@@ -1592,8 +1906,8 @@
             const message = text !== null ? text : input.value.trim();
 
             if (!sessionId) {
-                alert('Please start a session first');
-                return;
+                await startSession();
+                if (!sessionId) return;
             }
 
             if (!message && text === null) return;
@@ -1757,6 +2071,8 @@
                 if (sessionDisplay) sessionDisplay.style.display = 'block';
                 document.getElementById('consultInput').focus();
             }
+
+            updateSessionDisplay();
         }
 
         async function sendConsult() {
@@ -1780,10 +2096,13 @@
             loading.classList.add('active');
 
             try {
-                // Send optionally with sessionId if an intake is active
+                // Keep consult history in consultSessionId, optionally pass intake context
                 const payload = { question: question };
+                if (consultSessionId) {
+                    payload.session_id = consultSessionId;
+                }
                 if (sessionId) {
-                    payload.session_id = sessionId;
+                    payload.context_session_id = sessionId;
                 }
 
                 const response = await fetch(`/consult`, {
@@ -1796,7 +2115,8 @@
 
                 // Save session ID for conversation memory
                 if (data.session_id) {
-                    sessionId = data.session_id;
+                    consultSessionId = data.session_id;
+                    updateSessionDisplay();
                 }
 
                 // Add bot response
@@ -2042,6 +2362,12 @@
                         sendConsult();
                     }
                 });
+            }
+
+            updateSessionDisplay();
+            loadHistory();
+            if (!sessionId) {
+                startSession();
             }
 
         });
