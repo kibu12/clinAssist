@@ -275,15 +275,30 @@ async def get_session_summary(
                 "recommended_action": symptom_record.get("recommended_action", "")
             }
         
+        # Normalize potentially legacy values to keep summary endpoint robust
+        progression_value = symptom_record.get("progression")
+        if progression_value not in {"improving", "worsening", "stable"}:
+            progression_value = None
+
+        onset_value = symptom_record.get("onset_type")
+        if onset_value not in {"sudden", "gradual"}:
+            onset_value = None
+
+        associated_value = symptom_record.get("associated_symptoms")
+        if isinstance(associated_value, str):
+            associated_value = [associated_value]
+        if associated_value is not None and not isinstance(associated_value, list):
+            associated_value = None
+
         # Build symptom record response
         symptom_data = SymptomRecord(
             chief_complaint=symptom_record.get("chief_complaint"),
             duration=symptom_record.get("duration"),
             severity=symptom_record.get("severity"),
-            progression=symptom_record.get("progression"),
-            associated_symptoms=symptom_record.get("associated_symptoms"),
+            progression=progression_value,
+            associated_symptoms=associated_value,
             affected_body_part=symptom_record.get("affected_body_part"),
-            onset_type=symptom_record.get("onset_type")
+            onset_type=onset_value
         )
         
         return {

@@ -163,9 +163,48 @@ def process_interaction(session_id: str, user_input: str) -> Dict[str, Any]:
         update_session_state(session_id, STATES["COLLECTING"])
     
     elif current_state == STATES["COLLECTING"] or current_state == STATES["CLARIFYING"]:
+        user_lower = (user_input or "").lower()
+
+        # Immediate stop for explicit severe wording
+        if re.search(r"\bsevere\b", user_lower):
+            risk_result = {
+                "risk_level": "CRITICAL",
+                "reason": "User reported severe symptoms, which requires immediate medical escalation.",
+                "recommended_action": "Seek doctor care immediately. If symptoms are worsening or dangerous, go to emergency care now."
+            }
+            risk_assessment = risk_result
+
+            existing_data = memory.get_symptom_data()
+            chief_complaint = existing_data.get("chief_complaint") or (user_input or "")
+            severe_summary = (
+                f"Chief Complaint: {chief_complaint}\n"
+                f"Duration: {existing_data.get('duration') or 'Not reported'}\n"
+                f"Severity (1-10): {existing_data.get('severity') or 'Not reported'}\n"
+                f"Progression: {existing_data.get('progression') or 'Not reported'}\n"
+                f"Affected Body Part: {existing_data.get('affected_body_part') or 'Not reported'}\n"
+                f"Onset Type: {existing_data.get('onset_type') or 'Not reported'}\n"
+                f"Associated Symptoms: {existing_data.get('associated_symptoms') or 'Not reported'}\n"
+                "Clinical Note: Intake stopped because user reported severe symptoms."
+            )
+
+            update_symptom_record(session_id, {
+                "chief_complaint": chief_complaint,
+                "risk_level": risk_result["risk_level"],
+                "risk_reason": risk_result["reason"],
+                "recommended_action": risk_result["recommended_action"],
+                "summary": severe_summary,
+            })
+
+            response_text = (
+                "This sounds severe, so I am marking this as critical and ending this intake now. "
+                "Please seek doctor care immediately."
+            )
+            wellness_tip = "Critical: seek doctor care immediately."
+            update_session_state(session_id, STATES["COMPLETE"])
+
         # Immediate stop for urgent keywords: do not continue seven-question intake
         urgent_detected = risk.detect_urgent_keyword(user_input or "")
-        if urgent_detected:
+        if (not response_text) and urgent_detected:
             risk_result = risk.build_urgent_assessment(urgent_detected, user_input or "")
             risk_assessment = risk_result
 
@@ -196,7 +235,7 @@ def process_interaction(session_id: str, user_input: str) -> Dict[str, Any]:
             )
             update_session_state(session_id, STATES["COMPLETE"])
 
-        else:
+        elif not response_text:
             # Extract symptoms from user input
             extracted = llm.extract_symptoms(
                 memory.conversation_history,

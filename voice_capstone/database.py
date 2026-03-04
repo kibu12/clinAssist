@@ -253,9 +253,19 @@ def get_symptom_record(session_id: str) -> Optional[Dict[str, Any]]:
         # Convert row to dictionary
         record = dict(row)
         
-        # Parse associated_symptoms JSON
-        if record.get("associated_symptoms_json"):
-            record["associated_symptoms"] = json.loads(record["associated_symptoms_json"])
+        # Parse associated_symptoms JSON (resilient to legacy malformed data)
+        raw_associated = record.get("associated_symptoms_json")
+        if raw_associated:
+            try:
+                parsed = json.loads(raw_associated)
+                if isinstance(parsed, list):
+                    record["associated_symptoms"] = parsed
+                elif isinstance(parsed, str) and parsed.strip():
+                    record["associated_symptoms"] = [parsed.strip()]
+                else:
+                    record["associated_symptoms"] = None
+            except (json.JSONDecodeError, TypeError):
+                record["associated_symptoms"] = [str(raw_associated).strip()] if str(raw_associated).strip() else None
         else:
             record["associated_symptoms"] = None
         

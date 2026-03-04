@@ -910,11 +910,11 @@
         .modal-content {
             background: white;
             width: 100%;
-            max-width: 600px;
-            border-radius: 16px;
+            max-width: 980px;
+            border-radius: 8px;
             border: 1px solid var(--border);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            max-height: 80vh;
+            max-height: 88vh;
             display: flex;
             flex-direction: column;
             animation: modalScale 0.3s ease-out;
@@ -957,12 +957,12 @@
         .modal-body {
             padding: 1.5rem;
             overflow-y: auto;
-            white-space: pre-wrap;
-            font-family: monospace;
+            white-space: normal;
+            font-family: inherit;
             font-size: 0.9rem;
             line-height: 1.6;
             color: #334155;
-            background: #f8fafc;
+            background: #f3f6fb;
         }
 
         .modal-footer {
@@ -1086,6 +1086,13 @@
             /* 3 columns for wider details */
         }
 
+        .report-box {
+            background: #ffffff;
+            border: 1px solid #dbe7ff;
+            border-radius: 0;
+            padding: 1rem;
+        }
+
         /* Health Assistant Chat Styles */
         .assistant-container {
             display: flex;
@@ -1129,6 +1136,7 @@
             border: 1px solid #e2e8f0;
             border-bottom-left-radius: 2px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+            white-space: pre-line;
         }
 
         .assistant-input-group {
@@ -1448,6 +1456,7 @@
         let audioChunks = [];
         let isRecording = false;
         let audioContext = null;
+        let hasConversationStarted = false;
         let autoplayBlockedNoticeShown = false;
 
         function getActiveTabType() {
@@ -1553,7 +1562,6 @@
                             if (data.wellness_tip) {
                                 addWellnessTip(data.wellness_tip);
                             }
-                            addInteractiveSummaryPrompt();
                             document.getElementById('exportSection').classList.add('active');
                         }
                     }
@@ -1597,6 +1605,8 @@
         }
 
         async function startSession() {
+            hasConversationStarted = true;
+
             // Check if we're in the Health Consult tab
             if (document.getElementById('tab-consult').classList.contains('active')) {
                 consultSessionId = null;
@@ -1632,6 +1642,11 @@
         }
 
         async function startRecording() {
+            if (!hasConversationStarted) {
+                alert('Press New to start a conversation first.');
+                return;
+            }
+
             if (isRecording || !sessionId) return;
 
             try {
@@ -1828,6 +1843,11 @@
         }
 
         async function convertAndSendConsultAudio(audioBlob) {
+            if (!hasConversationStarted) {
+                alert('Press New to start a conversation first.');
+                return;
+            }
+
             const loading = document.getElementById('consultLoading');
             loading.classList.add('active');
 
@@ -1902,12 +1922,17 @@
         // --- END CONSULT SPECIFIC RECORDING LOGIC ---
 
         async function sendText(text = null) {
+            if (!hasConversationStarted) {
+                alert('Press New to start a conversation first.');
+                return;
+            }
+
             const input = document.getElementById('textInput');
             const message = text !== null ? text : input.value.trim();
 
             if (!sessionId) {
-                await startSession();
-                if (!sessionId) return;
+                alert('Press New to start a conversation first.');
+                return;
             }
 
             if (!message && text === null) return;
@@ -1971,7 +1996,6 @@
             if (data.is_complete) {
                 console.log("DEBUG: Session is complete, adding interactive blocks");
                 // NEW: Add interactive block for summary
-                addInteractiveSummaryPrompt();
                 document.getElementById('exportSection').classList.add('active');
             }
 
@@ -2024,21 +2048,6 @@
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
-        function addInteractiveSummaryPrompt() {
-            const messagesDiv = document.getElementById('messages');
-            const actionBlock = document.createElement('div');
-            actionBlock.className = 'action-block';
-            actionBlock.innerHTML = `
-                <div style="font-size: 0.9rem; color: #475569; font-weight: 500;">Is there anything else I can help you with?</div>
-                <div class="btn-group">
-                    <button class="btn-pill primary" onclick="viewSummaryReport()">Yes, show my report</button>
-                    <button class="btn-pill" onclick="addMessage('assistant', 'No problem. Your session is now complete. Take care!')">No, I'm done</button>
-                </div>
-            `;
-            messagesDiv.appendChild(actionBlock);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-
         function switchMainTab(tabId) {
             // Update Tab styling
             document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
@@ -2076,6 +2085,11 @@
         }
 
         async function sendConsult() {
+            if (!hasConversationStarted) {
+                alert('Press New to start a conversation first.');
+                return;
+            }
+
             const input = document.getElementById('consultInput');
             const question = input.value.trim();
             if (!question) return;
@@ -2165,7 +2179,7 @@
                 const formattedSummary = summary.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
                 let reportHtml = `
-                    <div id="reportContainer" style="background: white; padding: 2.5rem; border-radius: 8px; width: 100%; box-sizing: border-box;">
+                    <div id="reportContainer" style="background: white; padding: 2rem; border-radius: 0; border: 1px solid #dbe7ff; width: 100%; min-height: 620px; box-sizing: border-box;">
                         <div class="report-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
                             <h1 style="color: #1e3a8a; border-bottom: 2px solid #3b82f6; padding-bottom: 0.5rem; margin-bottom: 0; font-size: 1.5rem;">CLINICAL SUMMARY REPORT</h1>
                             <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 0.5rem;">Session: ${sessionId} | Date: ${new Date().toLocaleDateString()}</p>
@@ -2366,9 +2380,6 @@
 
             updateSessionDisplay();
             loadHistory();
-            if (!sessionId) {
-                startSession();
-            }
 
         });
     </script>

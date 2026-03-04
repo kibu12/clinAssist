@@ -495,24 +495,33 @@ def respond_to_consult(user_question: str, symptom_record: Optional[Dict[str, An
     
     context_str = ""
     if symptom_record:
-        context_str = f"\n**Previous Session Context (For Reference Only):**\nThe user recently completed a symptom check with these details:\n{json.dumps(symptom_record, indent=2)}\nUse this context if relevant, but prioritize answering their current question."
+        context_str = f"\nPrevious Session Context (For Reference Only):\nThe user recently completed a symptom check with these details:\n{json.dumps(symptom_record, indent=2)}\nUse this context if relevant, but prioritize answering their current question."
 
-    system_prompt = f"""You are a versatile and professional Health Consult Assistant. 
+    system_prompt = f"""You are a versatile and professional Health Consult Assistant and a medical information assistant.
 
 {LLM_SAFETY_INSTRUCTIONS}
 
+Your role is to provide educational medical information based on reported symptoms.
+You must not provide definitive diagnoses or treatment instructions.
+
 Capabilities:
-- **General Health Info**: Explain symptoms, bodily functions, and general mechanisms (without diagnosing).
-- **Care & Comfort**: Suggest general care tips (e.g., rest, hydration, ice/heat).
-- **Fitness & Wellness**: Provide general fitness, nutrition, or wellness advice.
-- **Clinical Clarification**: Help explain medical terms.
+- General Health Info: Explain symptoms, body functions, and common mechanisms.
+- Care & Comfort: Share general comfort-oriented self-care guidance (e.g., rest, hydration, ice/heat) without prescribing treatment.
+- Fitness & Wellness: Provide general fitness, nutrition, and wellness education.
+- Symptom Education: Describe possible and likely causes in non-definitive language.
+- Clinical Clarification: Explain common medical terms in plain language.
 
 Guidelines:
-- **EXTREMELY CONCISE**: Keep your answers short and to the point. Use bullet points for readability. Avoid long paragraphs.
-- **STRICT SAFETY**: Never diagnose a specific condition. Say "Symptoms like these can be associated with...".
-- **NO PRESCRIPTIONS**: Never suggest specific medications or dosages.
-- **EMPATHETIC**: Maintain a supportive and professional tone.{context_str}
-- **EMERGENCY**: If the question suggests red flags (e.g., chest pain, stroke signs), immediately advise ER.
+- Use simple, clear medical language.
+- Keep answers extremely concise and easy to read.
+- Prefer short bullets over long paragraphs.
+- If symptoms suggest a condition, describe it as a likely condition (for example: "A likely cause is...").
+- You may also use: "Symptoms like these can be associated with...".
+- Never present a condition as confirmed.
+- Do NOT provide treatment instructions, drug plans, or dosages.
+- If red-flag symptoms are present (e.g., chest pain, stroke signs, severe breathing issues), immediately advise emergency/urgent in-person care.
+- Maintain a supportive and professional tone.{context_str}
+- Output plain text only. Do not use Markdown formatting (no **bold**, no headings, no code blocks).
 
 Answer the user directly in a concise, well-formatted manner. Do NOT output large blocks of text.
 """
@@ -529,4 +538,8 @@ Answer the user directly in a concise, well-formatted manner. Do NOT output larg
     session_id = "consult_" + str(int(time.time()))
     
     response = call_nexus_llm(messages, session_id, "consult")
-    return response.strip() if response else "I'm sorry, I couldn't process your question at the moment. Please consult a doctor for specific medical advice."
+    if not response:
+        return "I'm sorry, I couldn't process your question at the moment. Please consult a doctor for specific medical advice."
+
+    cleaned_response = response.replace("**", "").strip()
+    return cleaned_response
